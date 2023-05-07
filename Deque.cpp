@@ -3,163 +3,57 @@
 
 #include <iostream>
 #include <fstream>
+#include <cmath>
 using namespace std;
 //ifstream f("deque.in.txt");
 //ofstream g("deque.out.txt");
 ifstream f("deque.in");
 ofstream g("deque.out");
 
-//////
-class Node
+int dq_size(int l, int r)
 {
-public:
-    int value;
-    int index;
-    Node* next;
-    Node* prev;
-
-public:
-    Node() = default;
-    Node(const int value, const int index)
-    {
-        this->value = value;
-        this->index = index;
-        prev = NULL;
-        next = NULL;
-    }
-};
-class Deque : private Node
-{
-private:
-    unsigned size;
-    Node* begin_;
-    Node* end_;
-
-public:
-    Deque()
-    {
-        size = 0;
-        begin_ = NULL;
-        end_ = NULL;
-    }
-    //////
-    void push_back(const int num, const int ind)
-    {
-        Node* new_node = new Node(num, ind);
-        if (begin_ == NULL)
-        {
-            begin_ = new_node;
-        }
-        else
-        {
-            end_->next = new_node;
-            new_node->prev = end_;
-        }
-        end_ = new_node;
-        size++;
-    }
-    void pop_back()
-    {
-        if (this->size == 1)
-        {
-            Node* p = begin_;
-            begin_ = NULL;
-            delete p;
-            size--;
-        }
-        else
-            if (end_ != NULL)
-            {
-                Node* py = end_;
-                end_ = end_->prev;
-                end_->next = NULL;
-                delete py;
-                size--;
-            }
-    }
-    //
-    void push_front(const int num, const int ind)
-    {
-        Node* new_node = new Node(num, ind);
-        if (begin_ == NULL)
-        {
-            end_ = new_node;
-        }
-        else
-        {
-            new_node->next = begin_;
-            begin_->prev = new_node;
-        }
-        begin_ = new_node;
-        size++;
-    }
-    void pop_front()
-    {
-        if (this->size == 1)
-        {
-            Node* p = begin_;
-            begin_ = NULL;
-            delete p;
-            size--;
-        }
-        else
-            if (end_ != NULL)
-            {
-                Node* py = begin_;
-                begin_ = begin_->next;
-                begin_->prev = NULL;
-                delete py;
-                size--;
-            }
-    }
-    //////
-    unsigned get_size()
-    {
-        return this->size;
-    }
-    int back_index()
-    {
-        return this->end_->index;
-    }
-    int front_index()
-    {
-        return this->begin_->index;
-    }
-    int back_value()
-    {
-        return this->end_->value;
-    }
-    int front_value()
-    {
-        return this->begin_->value;
-    }
-    ////// 
-};
+    if (l < 0 || r < 0)
+        return 0;
+    if (l > r)
+        return 0;
+    return abs(r - l) + 1;
+}
 int main()
 {
-    Deque dq;
     int n, k;
-    int x;
-    long long sum = 0;
     f >> n >> k;
+    int* dq_val, *dq_index;
+    long long sum = 0;
+    dq_val = new int[n + 1];
+    dq_index = new int[n + 1];
+    for (int i = 0; i <= n; i++)
+    {
+        dq_val[i] = -10000001;
+        dq_index[i] = -10000001;
+    }
+    int left = 0, right = 0;
+    int x;
     for (int i = 0; i < n; i++)
     {
         f >> x;
-        while (dq.get_size() && dq.back_value() > x)
+        while (dq_size(left, right) && right >= 0 && right <= n && dq_val[right] >= x)
         {
-            dq.pop_back();
+            right--;
         }
-        dq.push_back(x, i);
-        while (dq.get_size() && dq.front_index() <= i - k)
+        dq_val[++right] = x;
+        dq_index[right] = i;
+        while (dq_size(left, right) && left >= 0 && left <= n && dq_index[left] <= i - k)
         {
-            dq.pop_front();
+            left++;
         }
         if (i < k - 1)
             continue;
-        sum += dq.front_value();
+        if(dq_size(left, right) && left >= 0 && left <= n)
+            sum += dq_val[left];
     }
-    //cout << sum;
     g << sum;
+    delete[] dq_val;
+    delete[] dq_index;
     f.close();
     g.close();
     return 0;
